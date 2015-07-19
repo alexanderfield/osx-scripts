@@ -1,9 +1,5 @@
 #!/bin/bash
-#
-# Author: Alexander Field
-# License
-#
-#
+
 
 if [ "$#" -eq 0 ]; then
     echo "what do you want to search for?"
