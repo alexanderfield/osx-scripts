@@ -1,71 +1,54 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# All Vagrant configuration is done below. The "2" in Vagrant.configure
-# configures the configuration version (we support older styles for
-# backwards compatibility). Please don't change it unless you know what
-# you're doing.
 Vagrant.configure(2) do |config|
-  # The most common configuration options are documented and commented below.
-  # For a complete reference, please see the online documentation at
-  # https://docs.vagrantup.com.
 
-  # Every Vagrant development environment requires a box. You can search for
-  # boxes at https://atlas.hashicorp.com/search.
+	config.vm.box = "dev"
   config.vm.box = "../packer/centos-7/packer-vagrant-centos-7-1503-01-minimal.box"
 
-  # Disable automatic box update checking. If you disable this, then
-  # boxes will only be checked for updates when the user runs
-  # `vagrant box outdated`. This is not recommended.
-  # config.vm.box_check_update = false
+	# This section will run on all machines...	
+	config.vm.provision "shell", inline: <<-SHELL
 
-  # Create a forwarded port mapping which allows access to a specific port
-  # within the machine from a port on the host machine. In the example below,
-  # accessing "localhost:8080" will access port 80 on the guest machine.
-  # config.vm.network "forwarded_port", guest: 80, host: 8080
+		# Disable firewall on all machines 
+		sudo systemctl stop firewalld
 
-  # Create a private network, which allows host-only access to the machine
-  # using a specific IP.
-  # config.vm.network "private_network", ip: "192.168.33.10"
+		# create a network map so that machines can talk to each other 
+        	sudo echo "192.168.33.10 kafka.example.com kafka" >> /etc/hosts
+	        sudo echo "192.168.33.11 docker.example.com docker" >> /etc/hosts
+  	    SHELL
 
-  # Create a public network, which generally matched to bridged network.
-  # Bridged networks make the machine appear as another physical device on
-  # your network.
-  # config.vm.network "public_network"
+  # This section only runs on "kafka"	
+	config.vm.define "kafka" do |kafka|
 
-  # Share an additional folder to the guest VM. The first argument is
-  # the path on the host to the actual folder. The second argument is
-  # the path on the guest to mount the folder. And the optional third
-  # argument is a set of non-required options.
-  # config.vm.synced_folder "../data", "/vagrant_data"
+		kafka.vm.network "private_network", ip: "192.168.33.10"
+		
+		kafka.vm.provision "shell", inline: "sudo sysctl kernel.hostname=kafka.example.com"
 
-  # Provider-specific configuration so you can fine-tune various
-  # backing providers for Vagrant. These expose provider-specific options.
-  # Example for VirtualBox:
-  #
-  # config.vm.provider "virtualbox" do |vb|
-  #   # Display the VirtualBox GUI when booting the machine
-  #   vb.gui = true
-  #
-  #   # Customize the amount of memory on the VM:
-  #   vb.memory = "1024"
-  # end
-  #
-  # View the documentation for the provider you are using for more
-  # information on available options.
+		# kafka requires java, so install openjdk 
+		kafka.vm.provision "shell", inline: "yum -y install java-1.8.0-openjdk"
 
-  # Define a Vagrant Push strategy for pushing to Atlas. Other push strategies
-  # such as FTP and Heroku are also available. See the documentation at
-  # https://docs.vagrantup.com/v2/push/atlas.html for more information.
-  # config.push.define "atlas" do |push|
-  #   push.app = "YOUR_ATLAS_USERNAME/YOUR_APPLICATION_NAME"
-  # end
+		# start the local instance of zookeeper (looks like the 2 lines below are idempotent...)
+		kafka.vm.provision "shell", inline: "/vagrant/sw/external/kafka_2.10-0.8.2.1/bin/zookeeper-server-start.sh /vagrant/sw/external/kafka_2.10-0.8.2.1/config/zookeeper.properties &"
+		kafka.vm.provision "shell", inline: "/vagrant/sw/external/kafka_2.10-0.8.2.1/bin/kafka-server-start.sh /vagrant/sw/external/kafka_2.10-0.8.2.1/config/server.properties &"
+    kafka.vm.provision "shell", inline: "/vagrant/sw/external/kafka_2.10-0.8.2.1/bin/kafka-server-start.sh /vagrant/sw/external/kafka_2.10-0.8.2.1/config/server-1.properties &"
+		kafka.vm.provision "shell", inline: "/vagrant/sw/external/kafka_2.10-0.8.2.1/bin/kafka-server-start.sh /vagrant/sw/external/kafka_2.10-0.8.2.1/config/server-2.properties &"
 
-  # Enable provisioning with a shell script. Additional provisioners such as
-  # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
-  # documentation for more information about their specific syntax and use.
-  # config.vm.provision "shell", inline: <<-SHELL
-  #   sudo apt-get update
-  #   sudo apt-get install -y apache2
-  # SHELL
+	end
+
+	config.vm.define "docker" do |docker|
+
+		docker.vm.network "private_network", ip: "192.168.33.11"
+		docker.vm.provision "shell", inline: "sudo sysctl kernel.hostname=docker.example.com"
+
+		# Instructions: https://docs.docker.com/installation/centos/	
+		docker.vm.provision "shell", inline:  "sudo yum -y localinstall --nogpgcheck /vagrant/sw/external/docker-engine-1.7.0-1.el6.x86_64.rpm"
+		docker.vm.provision "shell", inline:  "sudo service docker start"
+		docker.vm.provision "shell", inline:  "sudo chkconfig docker on"
+		docker.vm.provision "shell", inline:  "sudo usermod -aG docker vagrant"
+		docker.vm.provision "shell", inline:  "sudo docker pull centos"
+		docker.vm.provision "shell", inline:  "sudo docker run -itd --name=hmaster centos"
+
+	end
+
 end
+
