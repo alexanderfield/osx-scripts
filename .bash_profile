@@ -19,6 +19,8 @@ alias op='echo Running netstat...;netstat -atp tcp | grep -i listen;echo Now run
 alias rm=srm
 alias shred=srm
 
+alias topc='top -o cpu'
+alias topm='top -o mem'
 
 export PS1="[\@] $ "
 
