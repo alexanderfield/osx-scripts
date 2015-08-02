@@ -8,9 +8,12 @@ alias lc='clear;pwd;ll'
 # for when I "think" in windows...
 alias dir=ll
 alias cls=clear
+alias cl=cls
+# zen is ctrl-l ... https://github.com/jlevy/the-art-of-command-line#everyday-use
 
 # search
 alias ggl='. ~/Projects/osx-scripts/shell/ggl.sh'
+alias google=ggl
 
 # Open Ports, see what's LISTENING...
 alias op='echo Running netstat...;netstat -atp tcp | grep -i listen;echo Now running lsof...;lsof -i -P | grep -i listen'
