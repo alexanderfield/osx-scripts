@@ -17,6 +17,7 @@ alias google=ggl
 
 # Open Ports, see what's LISTENING...
 alias op='echo Running netstat...;netstat -atp tcp | grep -i listen;echo Now running lsof...;lsof -i -P | grep -i listen'
+alias ip="ifconfig en0 | grep \"inet \" | awk '{print \$2}'"
 
 # If you're going to rm, might as well make it srm...
 alias rm=srm
