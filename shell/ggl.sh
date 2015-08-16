@@ -22,4 +22,4 @@ do
    i+=1
 done
 
-open -a Safari http://www.google.com/search?q=$q
+open -a Epic https://duckduckgo.com/?q=$q
