@@ -1,4 +1,3 @@
-
 # ls variants...
 alias ll='ls -l'
 alias la='ls -la'
@@ -14,6 +13,9 @@ alias cl=cls
 # search
 alias ggl='. ~/Projects/osx-scripts/shell/ggl.sh'
 alias google=ggl
+
+# editor
+alias b=brackets
 
 # Open Ports, see what's LISTENING...
 alias op='echo Running netstat...;netstat -atp tcp | grep -i listen;echo Now running lsof...;lsof -i -P | grep -i listen'
