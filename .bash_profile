@@ -13,6 +13,7 @@ alias cl=cls
 # search
 alias ggl='. ~/Projects/osx-scripts/shell/ggl.sh'
 alias google=ggl
+alias grep='grep --color=auto'
 
 # editor
 alias b=brackets
@@ -22,11 +23,14 @@ alias op='echo Running netstat...;netstat -atp tcp | grep -i listen;echo Now run
 alias ip="ifconfig en0 | grep \"inet \" | awk '{print \$2}'"
 
 # If you're going to rm, might as well make it srm...
-alias rm=srm
-alias shred=srm
+#alias rm=srm
+#alias shred=srm
 
 alias topc='top -o cpu'
 alias topm='top -o mem'
+
+alias P='cd ~/Projects;pwd'
+alias n=node
 
 export PS1="[\@] $ "
 
